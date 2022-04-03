@@ -4,3 +4,5 @@ figs/
 figs/*
 
 *.csv
+
+*.root
