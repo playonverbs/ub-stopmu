@@ -8,3 +8,4 @@ numpy==1.16.6
 pandas==0.24.2
 pylandau==2.1.0
 scipy==1.2.3
+root-numpy==4.8.0
