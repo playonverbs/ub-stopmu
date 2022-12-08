@@ -7,11 +7,28 @@ from scipy.optimize import curve_fit
 
 import typing
 from collections.abc import Callable
+from collections import namedtuple
+
+class LandauParams(namedtuple('LandauParams', ['mpv', 'eta'])):
+    @property
+    def scale(self, a):
+        self.mpv = self.mpv * a - (2 * a * self.eta * np.log(a))/np.pi
+        self.eta = self.eta * a
+    def shift(self, m):
+        self.mpv = self.mpv + m
+    def sum(self, L_2):
+        return LandauParams(mpv = self.mpv + L_2.mpv, eta = self.eta + L_2.eta)
+
+class GLParams(namedtuple('GLParams', LandauParams._fields + ('sigma',))):
+    @property
+    def scale(self, a):
+        self.mpv = self.mpv * a - (2 * a * self.eta * np.log(a))/np.pi
+        self.eta = self.eta * a
+
+# LandauParams = namedtuple('LandauParams', ['mpv', 'scale'])
 
 # invert Recombination Modified Box Model to get dE/dx from dQ/dx
-
-
-def ModBoxInverse(dqdx):
+def ModBoxInverse(dqdx: float) -> float:
     # argon density [g/cm^3]
     rho = 1.396
     # electric field [kV/cm]
@@ -31,8 +48,6 @@ def dEdx(x, elecgain):
 def modulate_theory_mpv(
     func:        Callable[[float], float],
     # theory_mpvs: list[float],
-    egain_range: tuple[float, float],
-    egain_bins:  int
 ) -> dict[str, list[float]]:
     rr_ranges = np.linspace(100, 150, 10)
     BINS = np.linspace(1, 6.0, 100)
